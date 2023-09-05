@@ -15,6 +15,11 @@ class CmsApi
   public static $structure = null;
 
   /**
+   * Either `null` or an associative `array` where keys are the `locale` codes
+   */
+  public static $translations = null;
+
+  /**
    * CMS API GET request
    *
    * @param string $url
@@ -311,6 +316,36 @@ class CmsApi
   }
 
   /**
+   * Get translations strings from API
+   *
+   * @return boolean|array
+   */
+  public static function getTranslations()
+  {
+    $locale = App::getLocale();
+
+    if (self::$translations && isset(self::$translations[$locale])) {
+      return self::$translations[$locale];
+    }
+
+    $requestUrl = self::getEndpointUrl("string-translations/$locale");
+    $cacheKey = "cmsapi.translations.$locale";
+
+    $data = self::get($requestUrl, $cacheKey, null, [
+      CacherTags::data,
+      CacherTags::translations,
+      CacherTags::translation($locale),
+    ]);
+
+    $data = $data ? $data : [];
+
+    self::$translations = self::$translations || [];
+    self::$translations[$locale] = $data;
+
+    return $data;
+  }
+
+  /**
    * Get structure information from API
    *
    * @return boolean|array
@@ -435,15 +470,15 @@ class CmsApi
     if ($structure && isset($structure['analytics'])) {
       $env = App::environment();
 
-      // env production:
-      if ($env === 'production' || $env === 'prod') {
-        $gtmHeader = $structure['analytics']['gtm_header_prod'] ?? '';
-        $gtmBody = $structure['analytics']['gtm_body_prod'] ?? '';
-      }
       // env local:
-      elseif ($env === 'local') {
+      if (config('env.DEVELOPMENT')) {
         $gtmHeader = '';
         $gtmBody = '';
+      }
+      // env production:
+      elseif ($env === 'production' || $env === 'prod') {
+        $gtmHeader = $structure['analytics']['gtm_header_prod'] ?? '';
+        $gtmBody = $structure['analytics']['gtm_body_prod'] ?? '';
       }
       // env staging | dev:
       else {

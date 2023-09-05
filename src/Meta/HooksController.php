@@ -172,6 +172,31 @@ class HooksController extends Controller
   }
 
   /**
+   * Clear all `'translations'` tagged custom cache
+   *
+   * @return void
+   */
+  public function clearTranslations()
+  {
+    $msg = "Clear 'translations' cache hook called successfully.";
+    Cacher::clearCacheTranslations();
+    return $this->getMsg($msg);
+  }
+
+  /**
+   * Clear specific locale's `'translations'` tagged custom cache
+   *
+   * @param string $locale
+   * @return void
+   */
+  public function clearTranslation(string $locale = '')
+  {
+    $msg = "Clear '$locale translations' cache hook called successfully.";
+    Cacher::clearCacheTranslations($locale);
+    return $this->getMsg($msg);
+  }
+
+  /**
    * Deploy end hook
    *
    * @return void
@@ -304,7 +329,7 @@ class HooksController extends Controller
    */
   private function hasRichOutput()
   {
-    return !$this->isCalledFromConsole() || App::environment() === 'local';
+    return !$this->isCalledFromConsole() || config('env.DEVELOPMENT');
   }
 
   /**
