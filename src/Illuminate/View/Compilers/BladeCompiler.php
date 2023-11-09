@@ -18,11 +18,17 @@ class BladeCompiler extends Base
         if (!$this->compilesComponentTags) {
             return $value;
         }
-
+        // NOTE: without this Laravel would look for this component in
+        // 'LaravelFrontend\Illuminate\View\DynamicComponent', we just "hijack"
+        // that to the original class name
+        if (isset($this->classComponentAliases['dynamic-component'])) {
+            $this->classComponentAliases['dynamic-component'] =
+                'Illuminate\View\DynamicComponent';
+        }
         return (new ComponentTagCompiler(
             $this->classComponentAliases,
             $this->classComponentNamespaces,
-            $this
+            $this,
         ))->compile($value);
     }
 }
