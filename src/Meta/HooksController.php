@@ -17,6 +17,8 @@ use LaravelFrontend\Cacher\CacherTags;
 use LaravelFrontend\I18n\I18n;
 use LaravelFrontend\Meta\Visitor;
 use LaravelFrontend\Meta\LogsController;
+use LaravelFrontend\Helpers\Helpers;
+use Illuminate\Http\Request;
 
 class HooksController extends Controller
 {
@@ -131,6 +133,22 @@ class HooksController extends Controller
     {
         $msg = "Clear 'route.$routeId' cache hook called successfully.";
         Cacher::clearCacheRoute($routeId);
+        return $this->getMsg($msg);
+    }
+
+    /**
+     * Clear `'cmsapi.routeTemplate.{path}'` no tagged cache
+     *
+     * @param string $routeId
+     * @return void
+     */
+    public function clearSingleRoute(Request $request)
+    {
+        $path = $request->input('path');
+        $locale = $request->input('locale');
+        $cachekey = Helpers::getCacheKey('cmsapi.route.'.$locale.'/'.$path);
+        $msg = "Clear 'cmsapi.route.'.$locale.'/'.$path' cache hook called successfully. - '$cachekey'";
+        Cacher::clearCacheSingleRoute($cachekey);
         return $this->getMsg($msg);
     }
 

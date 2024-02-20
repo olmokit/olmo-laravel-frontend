@@ -68,6 +68,11 @@ Route::prefix('_/hooks')
             'clearRoute',
         ]);
 
+        Route::post('cache/clear-route', [
+            HooksController::class,
+            'clearSingleRoute',
+        ]);
+
         Route::get('cache/clear-img', [HooksController::class, 'clearImg']);
 
         Route::get('cache/clear-forms', [HooksController::class, 'clearForms']);
